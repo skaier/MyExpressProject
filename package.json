@@ -1,0 +1,22 @@
+{
+  "name": "express-demo",
+  "version": "1.0.0",
+  "description": "一个基础的Express应用框架",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "express",
+    "nodejs",
+    "framework"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.6.0",
+    "express": "^5.1.0",
+    "morgan": "^1.10.0"
+  }
+}

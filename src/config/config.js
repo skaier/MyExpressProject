@@ -7,6 +7,11 @@ const config = {
   },
   logger: {
     format: process.env.LOG_FORMAT || 'combined'
+  },
+  cors: {
+    origin: process.env.CORS_ORIGIN || '*',
+    methods: process.env.CORS_METHODS || 'GET,POST,PUT,DELETE,OPTIONS',
+    allowedHeaders: process.env.CORS_ALLOWED_HEADERS || 'Content-Type,Authorization'
   }
 };
 

@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
 });
 
 // 用户路由
-app.use('/users', usersRouter);
+app.use('/api/users', usersRouter);
 
 // 健康检查路由
 app.get('/health', (req, res) => {
@@ -39,6 +39,9 @@ app.use((err, req, res, next) => {
 
 // 设置端口
 app.listen(config.app.port, () => {
+  console.log('======================================');
+  console.log(`服务端口: ${config.app.port}`);
   console.log(`服务器运行在 http://localhost:${config.app.port}`);
   console.log(`环境: ${config.app.env}`);
+  console.log('======================================');
 });

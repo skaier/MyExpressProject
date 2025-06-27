@@ -18,6 +18,11 @@ app.get('/', (req, res) => {
   res.json({ message: '欢迎使用Express框架' });
 });
 
+// 测试路由
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Test route working' });
+});
+
 // 用户路由
 app.use('/api/users', usersRouter);
 
@@ -37,11 +42,5 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: '服务器错误' });
 });
 
-// 设置端口
-app.listen(config.app.port, () => {
-  console.log('======================================');
-  console.log(`服务端口: ${config.app.port}`);
-  console.log(`服务器运行在 http://localhost:${config.app.port}`);
-  console.log(`环境: ${config.app.env}`);
-  console.log('======================================');
-});
+// 导出app供index.js使用
+module.exports = app;

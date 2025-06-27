@@ -1,4 +1,4 @@
-const { pool } = require('../config/db');
+const { pool } = require('../config/db.js');
 const ApiError = require('../utils/ApiError');
 
 class User {
@@ -16,7 +16,7 @@ class User {
   // 检查邮箱是否已被使用
   static async isEmailTaken(email) {
     const [rows] = await pool.execute(
-      'SELECT id FROM users WHERE email = ?',
+      'SELECT id FROM user_table WHERE email = ?',
       [email]
     );
     return rows.length > 0;
@@ -26,7 +26,7 @@ class User {
   static async create(userData) {
     const { name, email, password, role } = userData;
     const [result] = await pool.execute(
-      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+      'INSERT INTO user_table (name, email, password, role) VALUES (?, ?, ?, ?)',
       [name, email, password, role]
     );
     return result.insertId;
@@ -35,7 +35,7 @@ class User {
   // 根据ID获取用户
   static async findById(id) {
     const [rows] = await pool.execute(
-      'SELECT id, name, email, role, is_active, created_at, updated_at FROM users WHERE id = ?',
+      'SELECT id, name, email, role, is_active, created_at, updated_at FROM user_table WHERE id = ?',
       [id]
     );
     return rows[0] ? new User(rows[0]) : null;
@@ -44,7 +44,7 @@ class User {
   // 根据邮箱获取用户
   static async findByEmail(email) {
     const [rows] = await pool.execute(
-      'SELECT * FROM users WHERE email = ?',
+      'SELECT * FROM user_table WHERE email = ?',
       [email]
     );
     return rows[0] ? new User(rows[0]) : null;
@@ -77,7 +77,7 @@ class User {
 
     values.push(id);
     const [result] = await pool.execute(
-      `UPDATE users SET ${updates.join(', ')} WHERE id = ?`,
+      `UPDATE user_table SET ${updates.join(', ')} WHERE id = ?`,
       values
     );
 
@@ -91,7 +91,7 @@ class User {
   // 删除用户
   static async delete(id) {
     const [result] = await pool.execute(
-      'DELETE FROM users WHERE id = ?',
+      'DELETE FROM user_table WHERE id = ?',
       [id]
     );
 
@@ -105,7 +105,7 @@ class User {
   // 获取所有用户
   static async findAll() {
     const [rows] = await pool.execute(
-      'SELECT id, name, email, role, is_active, created_at, updated_at FROM users'
+      'SELECT id, name, email, role, is_active, created_at, updated_at FROM user_table'
     );
     return rows.map(row => new User(row));
   }
@@ -114,7 +114,7 @@ class User {
 // 初始化用户表
 async function initUserTable() {
   await pool.execute(`
-    CREATE TABLE IF NOT EXISTS users (
+    CREATE TABLE IF NOT EXISTS user_table (
       id INT AUTO_INCREMENT PRIMARY KEY,
       name VARCHAR(255) NOT NULL,
       email VARCHAR(255) NOT NULL UNIQUE,

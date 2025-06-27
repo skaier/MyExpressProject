@@ -4,11 +4,13 @@ const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const { body, param } = require('express-validator');
+const swaggerUi = require('swagger-ui-express');
 const config = require('./config');
 const routes = require('./routes');
 const errorHandler = require('./middlewares/errorHandler');
 const validateRequest = require('./middlewares/validateRequest');
 const logger = require('./utils/logger');
+const swaggerSpecs = require('./config/swagger');
 
 const app = express();
 
@@ -52,8 +54,16 @@ app.use((req, res, next) => {
   next();
 });
 
+// 测试路由 - 放在中间件之前
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Test route working' });
+});
+
 // 请求验证中间件
 app.use(validateRequest);
+
+// Swagger文档
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, { explorer: true }));
 
 // API路由
 app.use('/api', routes);
@@ -64,6 +74,15 @@ app.get('/health', (req, res) => {
     status: 'ok',
     timestamp: new Date(),
     environment: config.app.env 
+  });
+});
+
+// 404 处理
+app.use((req, res, next) => {
+  res.status(404).json({
+    status: 'error',
+    message: 'Not Found',
+    code: 404
   });
 });
 

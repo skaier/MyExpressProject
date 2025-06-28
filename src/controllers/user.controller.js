@@ -1,5 +1,7 @@
 const User = require('../models/user.model');
 const logger = require('../utils/logger');
+const jwt = require('jsonwebtoken');
+const config = require('../config/env');
 
 // 获取所有用户
 const getAllUsers = async (req, res) => {
@@ -155,10 +157,75 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// 用户登录
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    // 验证请求体
+    if (!email || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: '邮箱和密码不能为空' 
+      });
+    }
+    
+    // 查找用户
+    const user = await User.findByEmail(email);
+    if (!user) {
+      return res.status(401).json({ 
+        success: false, 
+        message: '邮箱或密码不正确' 
+      });
+    }
+    
+    // 验证密码
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ 
+        success: false, 
+        message: '邮箱或密码不正确' 
+      });
+    }
+    
+    // 生成JWT令牌
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      config.JWT_SECRET,
+      { expiresIn: config.TOKEN_EXPIRE }
+    );
+    
+    logger.info(`User logged in: ${user.email}`);
+    
+    // 返回令牌
+    res.status(200).json({
+      success: true,
+      message: '登录成功',
+      data: {
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      }
+    });
+  } catch (err) {
+    logger.error(`登录失败: ${err.message}`);
+    res.status(500).json({
+      success: false,
+      message: '登录失败',
+      error: err.message
+    });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
   createUser,
   updateUser,
-  deleteUser
+  deleteUser,
+  loginUser
 };

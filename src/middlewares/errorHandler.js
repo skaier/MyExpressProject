@@ -14,23 +14,32 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // Handle Mongoose validation errors
-  if (err.name === 'ValidationError') {
-    const errors = Object.values(err.errors).map(el => el.message);
+  // Handle MySQL validation errors
+  if (err.code === 'ER_BAD_FIELD_ERROR') {
     return res.status(400).json({
       success: false,
-      message: 'Validation Error',
-      errors
+      message: 'Invalid field in request',
+      errors: [err.message]
     });
   }
 
-  // Handle duplicate key errors
-  if (err.code === 11000) {
-    const field = Object.keys(err.keyValue)[0];
+  // Handle MySQL duplicate entry errors
+  if (err.code === 'ER_DUP_ENTRY') {
+    const match = err.message.match(/Duplicate entry .* for key '(.*)'/);
+    const field = match ? match[1].split('.').pop() : 'field';
     return res.status(400).json({
       success: false,
       message: `${field} already exists`,
       errors: [`${field} must be unique`]
+    });
+  }
+
+  // Handle MySQL connection errors
+  if (err.code === 'ECONNREFUSED') {
+    return res.status(503).json({
+      success: false,
+      message: 'Database connection failed',
+      errors: ['Unable to connect to database']
     });
   }
 

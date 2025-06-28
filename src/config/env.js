@@ -20,4 +20,12 @@ const validateEnvVars = () => {
   process.env.TOKEN_EXPIRE = process.env.TOKEN_EXPIRE || '24h';
 };
 
-module.exports = validateEnvVars;
+// 导出环境变量和验证函数
+module.exports = {
+  validateEnvVars,
+  PORT: process.env.PORT || '3000',
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  LOG_LEVEL: process.env.LOG_LEVEL || 'info',
+  JWT_SECRET: process.env.JWT_SECRET,
+  TOKEN_EXPIRE: process.env.TOKEN_EXPIRE || '24h'
+};

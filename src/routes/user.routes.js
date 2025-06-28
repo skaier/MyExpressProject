@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user.controller');
+const authenticate = require('../middlewares/auth');
 const logger = require('../utils/logger');
 
 // 记录请求日志的中间件
@@ -10,6 +11,14 @@ router.use((req, res, next) => {
 });
 
 /**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *
  * @swagger
  * /users:
  *   get:
@@ -47,6 +56,8 @@ router.get('/', userController.getAllUsers);
  *     summary: 获取单个用户
  *     description: 根据用户ID获取用户信息
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -80,7 +91,7 @@ router.get('/', userController.getAllUsers);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:id', userController.getUserById);
+router.get('/:id', authenticate, userController.getUserById);
 
 /**
  * @swagger
@@ -135,6 +146,8 @@ router.post('/', userController.createUser);
  *     summary: 更新用户
  *     description: 根据用户ID更新用户信息
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -182,7 +195,7 @@ router.post('/', userController.createUser);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put('/:id', userController.updateUser);
+router.put('/:id', authenticate, userController.updateUser);
 
 /**
  * @swagger
@@ -191,6 +204,8 @@ router.put('/:id', userController.updateUser);
  *     summary: 删除用户
  *     description: 根据用户ID删除用户
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -225,6 +240,68 @@ router.put('/:id', userController.updateUser);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.delete('/:id', userController.deleteUser);
+router.delete('/:id', authenticate, userController.deleteUser);
+
+/**
+ * @swagger
+ * /users/login:
+ *   post:
+ *     summary: 用户登录
+ *     description: 使用邮箱和密码进行用户登录
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: 用户邮箱
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: 用户密码
+ *     responses:
+ *       200:
+ *         description: 登录成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: 登录成功
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     token:
+ *                       type: string
+ *                       description: JWT令牌
+ *                     user:
+ *                       $ref: '#/components/schemas/User'
+ *       401:
+ *         description: 邮箱或密码不正确
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: 服务器错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/login', userController.loginUser);
 
 module.exports = router;

@@ -3,7 +3,6 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-const { body, param } = require('express-validator');
 const swaggerUi = require('swagger-ui-express');
 const config = require('./config');
 const routes = require('./routes');
@@ -21,17 +20,9 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later'
 });
 
-// CORS配置
-const corsOptions = {
-  origin: config.cors.origin || '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-};
-
 // 安全中间件
 app.use(helmet());
-app.use(cors(corsOptions));
+app.use(cors(config.cors));
 app.use(limiter);
 
 // 日志中间件
@@ -54,22 +45,21 @@ app.use((req, res, next) => {
   next();
 });
 
-// 测试路由 - 放在中间件之前
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'Test route working' });
-});
-
-// 请求验证中间件
-app.use(validateRequest);
-
 // Swagger文档
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, { explorer: true }));
 
 // API路由
 app.use('/api', routes);
 
+// 测试路由
+app.get('/api/test', (req, res) => {
+  logger.info('Test endpoint accessed');
+  res.json({ message: 'Test route working' });
+});
+
 // 健康检查
 app.get('/health', (req, res) => {
+  logger.info('Health check performed');
   res.json({ 
     status: 'ok',
     timestamp: new Date(),

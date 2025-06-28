@@ -1,5 +1,6 @@
-const { pool } = require('../config/db.js');
+const { pool } = require('../config/database.js');
 const ApiError = require('../utils/ApiError');
+const bcrypt = require('bcrypt');
 
 class User {
   constructor({ id, name, email, password, role = 'user', is_active = true, created_at, updated_at }) {
@@ -22,12 +23,24 @@ class User {
     return rows.length > 0;
   }
 
+  // 加密密码
+  static async hashPassword(password) {
+    const salt = await bcrypt.genSalt(10);
+    return await bcrypt.hash(password, salt);
+  }
+
+  // 验证密码
+  async comparePassword(password) {
+    return await bcrypt.compare(password, this.password);
+  }
+
   // 创建用户
   static async create(userData) {
     const { name, email, password, role } = userData;
+    const hashedPassword = await this.hashPassword(password);
     const [result] = await pool.execute(
       'INSERT INTO user_table (name, email, password, role) VALUES (?, ?, ?, ?)',
-      [name, email, password, role]
+      [name, email, hashedPassword, role]
     );
     return result.insertId;
   }
@@ -122,8 +135,7 @@ async function initUserTable() {
       role ENUM('user', 'admin') DEFAULT 'user',
       is_active BOOLEAN DEFAULT TRUE,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      CONSTRAINT email_format CHECK (email REGEXP '^[\\\\w\\\\.-]+@[\\\\w\\\\.-]+\\\\.[\\\\w]{2,4})
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )
   `);
 }

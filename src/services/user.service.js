@@ -5,7 +5,7 @@ const User = require('../models/user.model');
  * 获取所有用户
  */
 const getAllUsers = async () => {
-  return await User.find();
+  return await User.findAll();
 };
 
 /**
@@ -26,7 +26,8 @@ const createUser = async (userData) => {
   if (await User.isEmailTaken(userData.email)) {
     throw new ApiError(400, 'Email already taken');
   }
-  return await User.create(userData);
+  const userId = await User.create(userData);
+  return await User.findById(userId);
 };
 
 /**
@@ -34,17 +35,19 @@ const createUser = async (userData) => {
  */
 const updateUser = async (userId, updateData) => {
   const user = await getUserById(userId);
-  Object.assign(user, updateData);
-  await user.save();
-  return user;
+  if (updateData.email && updateData.email !== user.email) {
+    if (await User.isEmailTaken(updateData.email)) {
+      throw new ApiError(400, 'Email already taken');
+    }
+  }
+  return await User.update(userId, updateData);
 };
 
 /**
  * 删除用户
  */
 const deleteUser = async (userId) => {
-  const user = await getUserById(userId);
-  await user.remove();
+  await User.delete(userId);
 };
 
 module.exports = {

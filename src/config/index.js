@@ -27,6 +27,13 @@ module.exports = {
     expiresIn: process.env.JWT_EXPIRES_IN || '1d'
   },
 
+  // CORS配置
+  cors: {
+    origin: process.env.CORS_ORIGIN || '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+  },
   // 日志配置
   logger: {
     format: process.env.LOG_FORMAT || 'dev'

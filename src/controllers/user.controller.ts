@@ -10,13 +10,13 @@ class UserController {
   @ApiResponse({ status: 400, description: '无效的用户数据' })
   async register(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { username, email, password } = req.body;
+      const { name, email, password } = req.body;
       
-      if (!username || !email || !password) {
-        throw new ApiError(400, 'Username, email and password are required');
+      if (!name || !email || !password) {
+        throw new ApiError(400, 'name, email and password are required');
       }
 
-      const user = await userService.createUser({ username, email, password });
+      const user = await userService.createUser({ name, email, password });
       
       res.status(201).json({
         success: true,
@@ -62,9 +62,9 @@ class UserController {
   async updateProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = parseInt(req.params.id);
-      const { username, email, password } = req.body;
+      const { name, email, password } = req.body;
       
-      const user = await userService.updateUser(userId, { username, email, password });
+      const user = await userService.updateUser(userId, { name, email, password });
       
       res.status(200).json({
         success: true,

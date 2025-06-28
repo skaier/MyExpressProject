@@ -3,13 +3,13 @@ import ApiError from '../utils/ApiError';
 import bcrypt from 'bcryptjs';
 
 interface CreateUserInput {
-  username: string;
+  name: string;
   email: string;
   password: string;
 }
 
 interface UpdateUserInput {
-  username?: string;
+  name?: string;
   email?: string;
   password?: string;
 }
@@ -19,23 +19,20 @@ class UserService {
     // Check if email already exists
     const existingUser = await userModel.getByEmail(userData.email);
     if (existingUser) {
-      throw new ApiError(400, 'Email already exists');
+      throw new ApiError(409, 'Email already exists');
     }
-
     // Hash password
     const hashedPassword = await bcrypt.hash(userData.password, 10);
-    
     // Create user
     const user = await userModel.create({
       ...userData,
       password: hashedPassword
     });
-
     return {
       id: user.id,
-      username: user.username,
+      name: user.name,
       email: user.email,
-      createdAt: user.createdAt
+      createdAt: user.createdAt,
     };
   }
 
@@ -46,17 +43,17 @@ class UserService {
     }
     return {
       id: user.id,
-      username: user.username,
+      name: user.name,
       email: user.email,
       createdAt: user.createdAt,
-      updatedAt: user.updatedAt
+      updatedAt: user.updatedAt,
     };
   }
 
   async updateUser(id: number, userData: UpdateUserInput): Promise<any> {
     const updates: Partial<UpdateUserInput> = {};
-    
-    if (userData.username) updates.username = userData.username;
+
+    if (userData.name) updates.name = userData.name;
     if (userData.email) updates.email = userData.email;
     if (userData.password) {
       updates.password = await bcrypt.hash(userData.password, 10);
@@ -69,9 +66,9 @@ class UserService {
     const user = await userModel.update(id, updates);
     return {
       id: user.id,
-      username: user.username,
+      name: user.name,
       email: user.email,
-      updatedAt: user.updatedAt
+      updatedAt: user.updatedAt,
     };
   }
 
@@ -92,20 +89,20 @@ class UserService {
 
     return {
       id: user.id,
-      username: user.username,
-      email: user.email
+      name: user.name,
+      email: user.email,
     };
   }
 
   async getAllUsers(): Promise<any[]> {
     const users = await userModel.getAll();
-    return users.map(user => ({
+    return users.map((user) => ({
       id: user.id,
-      username: user.username,
+      name: user.name,
       email: user.email,
       role: user.role,
       createdAt: user.createdAt,
-      updatedAt: user.updatedAt
+      updatedAt: user.updatedAt,
     }));
   }
 }

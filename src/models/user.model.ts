@@ -11,9 +11,9 @@ import ApiError from '../utils/ApiError';
  *         id:
  *           type: integer
  *           example: 1
- *         username:
+ *         name:
  *           type: string
- *           example: john_doe
+ *           example: John Doe
  *         email:
  *           type: string
  *           format: email
@@ -32,13 +32,13 @@ import ApiError from '../utils/ApiError';
  *           type: string
  *           format: date-time
  *       required:
- *         - username
+ *         - name
  *         - email
  *         - password
  */
 interface User {
   id?: number;
-  username: string;
+  name: string;
   email: string;
   password: string;
   role?: string;
@@ -47,15 +47,15 @@ interface User {
 }
 
 class UserModel {
-  private tableName = 'users';
+  private tableName = 'user_table';
 
   async create(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
-    const { username, email, password } = user;
-    const query = `INSERT INTO ${this.tableName} (username, email, password) VALUES (?, ?, ?)`;
+    const { name, email, password } = user;
+    const query = `INSERT INTO ${this.tableName} (name, email, password) VALUES (?, ?, ?)`;
     
     try {
-      const result = await db.query({ sql: query, values: [username, email, password] });
-      const user = await this.getById(result.insertId);
+      const result = await db.query({ sql: query, values: [name, email, password] }); 
+      const user = await this.getById(result.insertId); 
       if (!user) {
         throw new ApiError(500, 'Failed to retrieve created user');
       }
@@ -70,7 +70,7 @@ class UserModel {
     
     try {
       const [rows] = await db.query({ sql: query, values: [id] });
-      return rows[0] || null;
+      return rows  || null;
     } catch (error) {
       throw new ApiError(500, 'Failed to get user');
     }
@@ -81,7 +81,7 @@ class UserModel {
     
     try {
       const [rows] = await db.query({ sql: query, values: [email] });
-      return rows[0] || null;
+      return rows  || null;
     } catch (error) {
       throw new ApiError(500, 'Failed to get user by email');
     }
@@ -121,7 +121,7 @@ class UserModel {
   }
 
   async getAll(): Promise<User[]> {
-    const query = `SELECT id, username, email, role, createdAt, updatedAt FROM ${this.tableName}`;
+    const query = `SELECT id, name, email, role, createdAt, updatedAt FROM ${this.tableName}`;
     
     try {
       const [rows] = await db.query({ sql: query });

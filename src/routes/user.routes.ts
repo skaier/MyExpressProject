@@ -3,6 +3,29 @@
  * tags:
  *   - name: Users
  *     description: 用户管理
+ * 
+ * components:
+ *   responses:
+ *     UnauthorizedError:
+ *       description: 未授权 - 缺少或无效的认证令牌
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               error:
+ *                 type: string
+ *                 example: 未授权
+ *     AuthenticationFailed:
+ *       description: 认证失败 - 用户名或密码错误
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               error:
+ *                 type: string
+ *                 example: 认证失败
  */
 
 import { Router } from 'express';
@@ -32,7 +55,7 @@ const router = Router();
  */
 router.post('/register', 
   validateRequest({
-    username: { type: 'string', required: true },
+    name: { type: 'string', required: true },
     email: { type: 'string', format: 'email', required: true },
     password: { type: 'string', minLength: 6, required: true }
   }),
@@ -40,7 +63,7 @@ router.post('/register',
 );
 
 /**
- * @swswagger
+ * @swagger
  * /users/login:
  *   post:
  *     tags: [Users]
@@ -55,7 +78,7 @@ router.post('/register',
  *       200:
  *         description: 登录成功
  *       401:
- *         description: 认证失败
+ *         $ref: '#/components/responses/AuthenticationFailed'
  */
 router.post('/login',
   validateRequest({
@@ -83,7 +106,7 @@ router.post('/login',
  *             schema:
  *               $ref: '#/components/schemas/User'
  *       401:
- *         description: 未授权
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       404:
  *         description: 用户不存在
  */

@@ -18,6 +18,42 @@ router.use((req, res, next) => {
  *       type: http
  *       scheme: bearer
  *       bearerFormat: JWT
+ *   parameters:
+ *     userIdParam:
+ *       in: path
+ *       name: id
+ *       required: true
+ *       description: 用户ID
+ *       schema:
+ *         type: string
+ *   responses:
+ *     SuccessResponse:
+ *       description: 成功响应
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               success:
+ *                 type: boolean
+ *                 example: true
+ *               data:
+ *                 type: object
+ *                 description: 响应数据
+ *     ListResponse:
+ *       description: 列表响应
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               success:
+ *                 type: boolean
+ *                 example: true
+ *               data:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/User'
  *
  * @swagger
  * /users:
@@ -27,25 +63,9 @@ router.use((req, res, next) => {
  *     tags: [Users]
  *     responses:
  *       200:
- *         description: 成功获取用户列表
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/User'
+ *         $ref: '#/components/responses/ListResponse'
  *       500:
- *         description: 服务器错误
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
+ *         $ref: '#/components/responses/ServerError'
  */
 router.get('/', userController.getAllUsers);
 

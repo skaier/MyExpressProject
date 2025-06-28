@@ -1,9 +1,11 @@
-const path = require('path');
-const logger = require('./utils/logger');
-let server; // 声明server变量在模块作用域
+import path from 'path';
+import { Server } from 'http';
+import logger from './utils/logger';
+let server: Server; // 声明server变量在模块作用域
 
 // 加载环境变量
-require('dotenv').config({ 
+import dotenv from 'dotenv';
+dotenv.config({ 
   path: path.join(__dirname, '..', '.env')
 });
 
@@ -16,7 +18,7 @@ const requiredEnvVars = [
   'MYSQL_PASSWORD',
   'MYSQL_DATABASE',
   'JWT_SECRET'
-];
+] as const;
 
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 if (missingEnvVars.length > 0) {
@@ -27,10 +29,10 @@ if (missingEnvVars.length > 0) {
 logger.info('Environment variables loaded successfully');
 logger.info(`Database: ${process.env.MYSQL_DATABASE} at ${process.env.MYSQL_HOST}:${process.env.MYSQL_PORT}`);
 
-const db = require('./config/database.js');
-const { validateEnvVars } = require('./config/env');
-const app = require('./app');  // 修改为使用 src/app.js
-const port = process.env.PORT || 3000;
+import db from './config/database';
+import { validateEnvVars } from './config/env';
+import app from './app';
+const port = parseInt(process.env.PORT || '3000');
 
 // 验证环境变量
 validateEnvVars();
@@ -54,7 +56,7 @@ validateEnvVars();
       logger.info(`Environment: ${process.env.NODE_ENV}`);
     });
 
-    server.on('error', (error) => {
+    server.on('error', (error: NodeJS.ErrnoException) => {
       if (error.code === 'EADDRINUSE') {
         logger.error(`Port ${port} is already in use`);
         console.error(`\x1b[31mError: Port ${port} is already in use\x1b[0m`);
@@ -68,9 +70,10 @@ validateEnvVars();
     server.on('listening', () => {
       logger.debug('Server is now listening');
     });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Failed to start server:', error);
-    console.error('\x1b[31m%s\x1b[0m', 'Failed to start server:', error.message);
+    console.error('\x1b[31m%s\x1b[0m', 'Failed to start server:', 
+      error instanceof Error ? error.message : String(error));
     process.exit(1);
   }
 })();
@@ -78,10 +81,10 @@ validateEnvVars();
 // 优雅关闭
 process.on('SIGTERM', () => {
   logger.info('SIGTERM received. Shutting down gracefully');
-  server.close(() => {
+  server?.close(() => {
     logger.info('Server closed');
     process.exit(0);
   });
 });
 
-module.exports = server;
+// 不导出server变量，因为它是在异步代码中初始化的

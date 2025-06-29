@@ -95,7 +95,7 @@ router.post('/login',
  *     tags: [Users]
  *     summary: 获取用户信息
  *     security:
- *       - bearerAuth: []
+ *       - apiKeyAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/UserId'
  *     responses:
@@ -122,7 +122,7 @@ router.get('/:id',
  *     tags: [Users]
  *     summary: 更新用户信息
  *     security:
- *       - bearerAuth: []
+ *       - apiKeyAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/UserId'
  *     requestBody:
@@ -177,7 +177,7 @@ router.delete('/:id',
  *     tags: [Users]
  *     summary: 获取所有用户
  *     security:
- *       - bearerAuth: []
+ *       - apiKeyAuth: []
  *     responses:
  *       200:
  *         description: 成功

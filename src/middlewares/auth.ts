@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import ApiError from '../utils/ApiError';
+import { ApiError } from '../utils/ApiError';
 import config from '../config/env';
 
 interface JwtPayload {
@@ -12,14 +12,14 @@ interface JwtPayload {
 const auth = (req: Request, _res: Response, next: NextFunction): void => {
   try {
     // 1) Get token from header
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = req.headers.token as string;
     
     if (!token) {
-      throw new ApiError(401, 'Authentication required');
+      throw ApiError.unauthorized('Authentication required');
     }
 
     // 2) Verify token
-    const decoded = jwt.verify(token, config.app.jwtSecret) as JwtPayload;
+    const decoded = jwt.verify(token, config.app.jwtSecret) as unknown as JwtPayload;
     
     // 3) Add user to request
     req.user = { id: decoded.userId };
@@ -27,9 +27,9 @@ const auth = (req: Request, _res: Response, next: NextFunction): void => {
     next();
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
-      next(new ApiError(401, 'Invalid token'));
+      next(ApiError.unauthorized('Invalid token'));
     } else if (error instanceof jwt.TokenExpiredError) {
-      next(new ApiError(401, 'Token expired'));
+      next(ApiError.unauthorized('Token expired'));
     } else {
       next(error);
     }

@@ -7,5 +7,5 @@ export {
   config,
   db,
   AppServer,
-  swaggerSpecs
+  swaggerSpecs,
 };

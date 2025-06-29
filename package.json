@@ -4,9 +4,9 @@
   "description": "一个基础的Express应用框架",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "start": "node dist/server.js",
-    "dev": "concurrently \"tsc --watch\" \"nodemon -q dist/server.js\"",
+    "dev": "concurrently \"tsc --watch\" \"tsc-alias --watch\" \"nodemon -q dist/server.js\"",
     "test": "jest",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write src/**/*.ts"
@@ -38,6 +38,7 @@
     "mysql2": "^3.14.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "tsconfig-paths": "^4.2.0",
     "winston": "^3.17.0"
   },
   "devDependencies": {
@@ -64,6 +65,7 @@
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
     "typescript": "^5.8.3"
   }
 }

@@ -5,7 +5,7 @@ import morgan from 'morgan';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import userRoutes from './routes/user.routes';
-import errorHandler from './middlewares/errorHandler';
+import { errorHandler, notFoundHandler } from './middlewares/errorHandler';
 import config from './config/env';
 import logger from './utils/logger';
 import swaggerSpec from './config/swagger';
@@ -61,6 +61,10 @@ class App {
   }
 
   private initializeErrorHandling(): void {
+    // 404 handler - 应该在所有路由之后，错误处理之前
+    this.app.use(notFoundHandler);
+    
+    // Global error handler - 应该在最后
     this.app.use(errorHandler);
   }
 

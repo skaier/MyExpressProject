@@ -1,45 +1,58 @@
 import { Request, Response, NextFunction } from 'express';
-import ApiError from '../utils/ApiError';
+import { ApiError } from '../utils/ApiError';
+import { HttpStatus, HttpMessage } from '../constants/http.constants';
 import logger from '../utils/logger';
 
-interface ErrorResponse {
-  success: boolean;
-  message: string;
-  stack?: string;
-}
-
-const errorHandler = (
-  err: Error | ApiError,
+/**
+ * 全局错误处理中间件
+ */
+export const errorHandler = (
+  err: Error,
   _req: Request,
   res: Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: NextFunction
-): void => {
+) => {
   let error = err;
 
-  // Handle non-ApiError instances
+  // 如果错误不是 ApiError 实例，转换为 ApiError
   if (!(error instanceof ApiError)) {
-    const statusCode = 500;
-    const message = error.message || 'Internal Server Error';
-    error = new ApiError(statusCode, message, false, err.stack);
+    const statusCode = 
+      error instanceof SyntaxError 
+        ? HttpStatus.BAD_REQUEST 
+        : HttpStatus.INTERNAL_SERVER_ERROR;
+    
+    const message = 
+      error instanceof SyntaxError 
+        ? HttpMessage.BAD_REQUEST 
+        : HttpMessage.INTERNAL_SERVER_ERROR;
+    
+    error = new ApiError(
+      statusCode,
+      message,
+      false,
+      err.stack
+    );
   }
 
-  // Log the error
-  logger.error(error.toString());
-
-  // Prepare response
-  const response: ErrorResponse = {
+  const response = {
     success: false,
-    message: error.message
+    message: error.message,
+    ...(process.env.NODE_ENV === 'development' ? { stack: error.stack } : {}),
+    timestamp: Date.now()
   };
 
-  // Include stack trace in development
-  if (process.env.NODE_ENV === 'development') {
-    response.stack = error.stack;
+  // 记录非操作性错误
+  if (!(error as ApiError).isOperational) {
+    logger.error(error);
   }
 
-  // Send response
-  const statusCode = error instanceof ApiError ? error.statusCode : 500;
-  res.status(statusCode).json(response);
+  res.status((error as ApiError).statusCode).json(response);
 };
 
-export default errorHandler;
+/**
+ * 404错误处理中间件
+ */
+export const notFoundHandler = (req: Request, _res: Response, next: NextFunction) => {
+  next(ApiError.notFound(`Cannot ${req.method} ${req.path}`));
+};

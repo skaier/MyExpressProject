@@ -1,58 +1,53 @@
 import userModel from '../models/user.model';
-import ApiError from '../utils/ApiError';
+import { ApiError } from '../utils/ApiError';
 import bcrypt from 'bcryptjs';
-
-interface CreateUserInput {
-  name: string;
-  email: string;
-  password: string;
-}
-
-interface UpdateUserInput {
-  name?: string;
-  email?: string;
-  password?: string;
-}
+import { formatDateTime } from '../utils/date.util'; 
+import {
+  UserDTO,
+  UserCreateDTO,
+  UserUpdateDTO,
+  UserPaginationListDTO,
+  User,
+  UserQueryParams,
+} from '../interfaces/user.interface';
 
 class UserService {
-  async createUser(userData: CreateUserInput): Promise<any> {
+  private _toUserDTO(user: User): UserDTO {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      created_at: formatDateTime(user.created_at),
+      updated_at: formatDateTime(user.updated_at),
+    };
+  }
+
+  async createUser(userData: UserCreateDTO): Promise<UserDTO> {
     // Check if email already exists
     const existingUser = await userModel.getByEmail(userData.email);
     if (existingUser) {
-      throw new ApiError(409, 'Email already exists');
+      throw ApiError.conflict('Email already exists');
     }
     // Hash password
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     // Create user
     const user = await userModel.create({
       ...userData,
-      password: hashedPassword
+      password: hashedPassword,
     });
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      createdAt: user.createdAt,
-    };
+    return this._toUserDTO(user);
   }
 
-  async getUserById(id: number): Promise<any> {
+  async getUserById(id: number): Promise<UserDTO> {
     const user = await userModel.getById(id);
     if (!user) {
-      throw new ApiError(404, 'User not found');
+      throw ApiError.notFound('User not found');
     }
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
+    return this._toUserDTO(user);
   }
 
-  async updateUser(id: number, userData: UpdateUserInput): Promise<any> {
-    const updates: Partial<UpdateUserInput> = {};
-
+  async updateUser(id: number, userData: UserUpdateDTO): Promise<UserDTO> {
+    const updates: UserUpdateDTO = {}; 
     if (userData.name) updates.name = userData.name;
     if (userData.email) updates.email = userData.email;
     if (userData.password) {
@@ -60,50 +55,37 @@ class UserService {
     }
 
     if (Object.keys(updates).length === 0) {
-      throw new ApiError(400, 'No valid fields to update');
+      throw ApiError.badRequest('No valid fields to update');
     }
 
     const user = await userModel.update(id, updates);
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      updatedAt: user.updatedAt,
-    };
+    return this._toUserDTO(user);
   }
 
   async deleteUser(id: number): Promise<void> {
     await userModel.delete(id);
   }
 
-  async validateUserCredentials(email: string, password: string): Promise<any> {
+  async validateUserCredentials(email: string, password: string): Promise<UserDTO> {
     const user = await userModel.getByEmail(email);
     if (!user) {
-      throw new ApiError(401, 'Invalid credentials');
+      throw ApiError.unauthorized('Invalid credentials');
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      throw new ApiError(401, 'Invalid credentials');
+      throw ApiError.unauthorized('Invalid credentials');
     }
 
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-    };
+    return this._toUserDTO(user);
   }
 
-  async getAllUsers(): Promise<any[]> {
-    const users = await userModel.getAll();
-    return users.map((user) => ({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    }));
+  async getUsersWithPagination(params: UserQueryParams): Promise<UserPaginationListDTO> {
+    const result = await userModel.getWithPagination(params);
+    return {
+      ...result,
+      list: result.list.map((user) => this._toUserDTO(user)),
+    };
   }
 }
 

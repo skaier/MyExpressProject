@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import ApiError from '../utils/ApiError';
+import { ApiError } from '../utils/ApiError'; 
 
 interface ValidationRule {
   type: string;
@@ -69,7 +69,7 @@ const validateRequest = (schema: ValidationSchema) => {
       });
 
       if (errors.length > 0) {
-        throw new ApiError(400, errors.join(', '));
+        throw ApiError.badRequest(errors.join(', '));
       }
 
       next();

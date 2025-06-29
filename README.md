@@ -1,106 +1,155 @@
-# LittleExpress - Node.js Express API 项目
+# MyExpressProject
 
-## 项目概述
-这是一个基于Node.js和Express框架构建的RESTful API项目，实现了完整的用户管理系统，包括用户注册、登录、信息管理等功能。
+一个基于 Express + TypeScript 构建的轻量级后端框架，提供完整的用户管理系统和 API 文档。
+
+## 特性
+
+- 🚀 基于 Express.js 和 TypeScript
+- 📚 Swagger API 文档自动生成
+- 🔐 用户认证和授权
+- 📝 完整的用户管理 CRUD 操作
+- 🎯 请求验证和错误处理
+- 📊 MySQL 数据库集成
+- 🔍 分页查询支持
+- 📋 日志记录
+- 🛡️ 安全性配置 (Helmet, CORS, Rate Limiting)
 
 ## 技术栈
-- **运行时**: Node.js
-- **框架**: Express
-- **数据库**: MySQL
-- **认证**: JWT
-- **日志**: Winston + Morgan
-- **API文档**: Swagger UI
-- **测试**: Jest
-- **代码质量**: ESLint + Prettier
-- **语言**: TypeScript
 
-## 功能特性
-- 用户注册与登录
-- JWT认证
-- 用户信息管理
-- 密码加密存储
-- 完善的API文档
-- 请求验证
-- 错误处理中间件
-- 安全防护(Helmet, Rate Limiting)
-- 日志记录
+- Express.js
+- TypeScript
+- MySQL
+- Swagger (API 文档)
+- Winston (日志)
+- Helmet (安全)
+- JWT (认证)
 
 ## 项目结构
+
 ```
 src/
-├── app.ts            # Express应用配置
-├── index.ts          # 应用入口
-├── server.ts         # HTTP服务器
-├── config/           # 配置模块
-│   ├── database.ts   # 数据库配置
-│   ├── env.ts        # 环境变量
-│   ├── server.ts     # 服务器配置
-│   └── swagger.ts    # Swagger配置
-├── controllers/      # 控制器层
-│   └── user.controller.ts
-├── models/           # 数据模型层
-│   └── user.model.ts
-├── routes/           # 路由定义
-│   └── user.routes.ts
-├── services/         # 业务逻辑层
-│   └── user.service.ts
-├── middlewares/      # 中间件
-│   ├── auth.ts       # 认证中间件
-│   ├── errorHandler.ts
-│   └── validateRequest.ts
-├── types/            # 类型定义
-│   └── express.d.ts
-└── utils/            # 工具函数
-    ├── ApiError.ts
-    └── logger.ts
+├── config/         # 配置文件
+├── constants/      # 常量定义
+├── controllers/    # 控制器
+├── interfaces/     # 接口定义
+├── middlewares/    # 中间件
+├── models/         # 数据模型
+├── routes/         # 路由
+├── services/       # 业务逻辑
+├── swagger/        # Swagger 配置
+├── types/          # 类型定义
+├── utils/          # 工具函数
+├── app.ts          # Express 应用配置
+└── server.ts       # 服务器入口
 ```
 
-## 环境要求
-- Node.js 16+
-- MySQL 8+
-- npm 8+
+## 功能特性
 
-## 安装与运行
-1. 克隆仓库
+### 用户管理
+
+- 用户注册
+- 用户登录
+- 获取用户信息
+- 更新用户信息
+- 删除用户
+- 用户列表（支持分页）
+
+### API 安全
+
+- JWT 认证
+- 请求速率限制
+- 安全 HTTP 头
+- CORS 配置
+- 密码加密
+
+### 数据库
+
+- MySQL 连接池
+- 事务支持
+- 查询构建
+- 错误处理
+
+### 其他特性
+
+- 环境变量配置
+- 日志记录
+- 请求验证
+- 错误处理中间件
+- API 响应标准化
+
+## 快速开始
+
+1. 克隆项目
+
 ```bash
-git clone <repository-url>
-cd littleExpress
+git clone [repository-url]
+cd MyExpressProject
 ```
 
 2. 安装依赖
+
 ```bash
 npm install
 ```
 
 3. 配置环境变量
-复制.env.example为.env并填写实际值
-```bash
-cp .env.example .env
+
+复制 `.env.example` 文件到 `.env` 并配置必要的环境变量：
+
+```env
+PORT=3000
+DB_HOST=localhost
+DB_USER=your_username
+DB_PASSWORD=your_password
+DB_NAME=your_database
+JWT_SECRET=your_jwt_secret
 ```
 
-4. 启动开发服务器
+4. 创建数据库表
+
+执行 `user_table_ddl.sql` 文件创建必要的数据库表。
+
+5. 启动开发服务器
+
 ```bash
 npm run dev
 ```
 
-5. 访问API文档
-http://localhost:3000/api-docs
+6. 构建生产版本
 
-## API文档
-项目使用Swagger UI提供交互式API文档，启动后访问 `/api-docs` 即可查看。
-
-## 测试
-运行单元测试：
 ```bash
-npm test
+npm run build
 ```
 
-## 贡献指南
-1. Fork项目
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 打开Pull Request
+7. 启动生产服务器
+
+```bash
+npm start
+```
+
+## API 文档
+
+启动服务器后，访问 `http://localhost:3000/api-docs` 查看 Swagger API 文档。
+
+## 开发
+
+### 可用的 npm 脚本
+
+- `npm run dev` - 启动开发服务器
+- `npm run build` - 构建生产版本
+- `npm start` - 运行生产版本
+- `npm run lint` - 运行 ESLint 检查
+- `npm run format` - 格式化代码
+
+### 目录说明
+
+- `config/` - 包含所有配置文件
+- `controllers/` - 处理 HTTP 请求和响应
+- `models/` - 数据库模型和查询
+- `services/` - 业务逻辑
+- `middlewares/` - Express 中间件
+- `utils/` - 工具函数和辅助方法
 
 ## 许可证
+
 [MIT](LICENSE)

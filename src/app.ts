@@ -5,7 +5,7 @@ import morgan from 'morgan';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import userRoutes from './routes/user.routes';
-import uploadRoutes from './routes/uploadRoutes';
+import uploadRoutes from './routes/upload.routes';
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler';
 import config from './config/env';
 import logger from './utils/logger';
@@ -49,9 +49,6 @@ class App {
   }
 
   private initializeRoutes(): void {
-    // Static files
-    this.app.use('/uploads', express.static('uploads'));
-
     // API routes
     this.app.use('/api/users', userRoutes);
     this.app.use('/api/upload', uploadRoutes);

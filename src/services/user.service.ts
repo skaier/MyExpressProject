@@ -17,6 +17,7 @@ class UserService {
       id: user.id,
       name: user.name,
       email: user.email,
+      avatar: user.avatar,
       created_at: formatDateTime(user.created_at),
       updated_at: formatDateTime(user.updated_at),
     };
@@ -49,9 +50,19 @@ class UserService {
   async updateUser(id: number, userData: UserUpdateDTO): Promise<UserDTO> {
     const updates: UserUpdateDTO = {}; 
     if (userData.name) updates.name = userData.name;
-    if (userData.email) updates.email = userData.email;
+    if (userData.email) {
+      // Check if email is already used by another user
+      const existingUser = await userModel.getByEmail(userData.email);
+      if (existingUser && existingUser.id !== id) {
+        throw ApiError.conflict('Email already exists');
+      }
+      updates.email = userData.email;
+    }
     if (userData.password) {
       updates.password = await bcrypt.hash(userData.password, 10);
+    }
+    if (userData.avatar) {
+      updates.avatar = userData.avatar;
     }
 
     if (Object.keys(updates).length === 0) {
@@ -69,12 +80,12 @@ class UserService {
   async validateUserCredentials(email: string, password: string): Promise<UserDTO> {
     const user = await userModel.getByEmail(email);
     if (!user) {
-      throw ApiError.unauthorized('Invalid credentials');
+      throw ApiError.unauthorized('用户名或密码错误');
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      throw ApiError.unauthorized('Invalid credentials');
+      throw ApiError.unauthorized('用户名或密码错误');
     }
 
     return this._toUserDTO(user);

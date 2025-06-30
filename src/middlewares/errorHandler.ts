@@ -37,6 +37,7 @@ export const errorHandler = (
 
   const response = {
     success: false,
+    statusCode: (error as ApiError).statusCode,
     message: error.message,
     ...(process.env.NODE_ENV === 'development' ? { stack: error.stack } : {}),
     timestamp: Date.now()

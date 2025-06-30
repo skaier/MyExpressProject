@@ -33,6 +33,11 @@ import { PaginationResult } from '@/interfaces/common.interface';
  *         updated_at:
  *           type: string
  *           format: date-time
+ *         avatar:
+ *           type: string
+ *           description: User profile image URL
+ *           nullable: true
+ *           example: "/uploads/avatars/u123456.jpg"
  *       required:
  *         - name
  *         - email
@@ -44,6 +49,7 @@ interface User {
   email: string;
   password: string;
   role?: string;
+  avatar?: string | null;
   created_at?: Date;
   updated_at?: Date;
 }
@@ -52,11 +58,11 @@ class UserModel {
   private tableName = 'user_table';
 
   async create(user: Omit<User, 'id' | 'created_at' | 'updated_at'>): Promise<User> {
-    const { name, email, password } = user;
-    const query = `INSERT INTO ${this.tableName} (name, email, password) VALUES (?, ?, ?)`;
+    const { name, email, password, avatar } = user;
+    const query = `INSERT INTO ${this.tableName} (name, email, password, avatar) VALUES (?, ?, ?, ?)`;
 
     try {
-      const result = await db.query({ sql: query, values: [name, email, password] });
+      const result = await db.query({ sql: query, values: [name, email, password, avatar || null] });
       const user = await this.getById(result.insertId);
       if (!user) {
         throw new ApiError(500, 'Failed to retrieve created user');

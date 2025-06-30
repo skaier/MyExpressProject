@@ -1,5 +1,7 @@
 import { Router } from 'express';
-import { UploadController } from '../controllers/uploadController';
+import { UploadController } from '../controllers/upload.controller';
+import { singleUpload } from '../middlewares/fileUpload';
+import authenticate from '../middlewares/auth';
 
 const router = Router();
 
@@ -77,6 +79,53 @@ router.post('/multiple', async (req, res) => {
  */
 router.delete('/:filename', async (req, res) => {
   await UploadController.deleteFile(req, res);
+});
+
+/**
+ * @swagger
+ * /api/upload/avatar:
+ *   post:
+ *     summary: Upload user avatar
+ *     tags: [File Upload]
+ *     security:
+ *       - bearerAuth: []
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: formData
+ *         name: avatar
+ *         type: file
+ *         description: The avatar image to upload (JPEG/PNG/GIF, max 2MB)
+ *     responses:
+ *       200:
+ *         description: Avatar uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 file:
+ *                   type: object
+ *                   properties:
+ *                     originalName:
+ *                       type: string
+ *                     fileName:
+ *                       type: string
+ *                     size:
+ *                       type: number
+ *                     path:
+ *                       type: string
+ *       400:
+ *         description: No file uploaded, invalid file type or size exceeded
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+router.post('/avatar', authenticate, singleUpload, async (req, res) => {
+  await UploadController.uploadAvatar(req, res);
 });
 
 export default router;

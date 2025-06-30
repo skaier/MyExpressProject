@@ -38,8 +38,8 @@ class UserController {
   async updateProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = parseInt(req.params.id);
-      const { name, email, password } = req.body;
-      const user = await userService.updateUser(userId, { name, email, password });
+      const { name, email, password, avatar } = req.body;
+      const user = await userService.updateUser(userId, { name, email, password, avatar });
 
       ApiResponse.success(res, user, 'User profile updated successfully');
     } catch (error) {

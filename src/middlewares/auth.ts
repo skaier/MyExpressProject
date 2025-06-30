@@ -15,7 +15,7 @@ const auth = (req: Request, _res: Response, next: NextFunction): void => {
     const token = req.headers.token as string;
     
     if (!token) {
-      throw ApiError.unauthorized('Authentication required');
+      throw ApiError.unauthorized('请先登录');
     }
 
     // 2) Verify token
